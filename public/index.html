@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auction App - Home & Login</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-image:linear-gradient(to right,#0051ff, #ff9100);
+      margin: 0;
+      padding: 20px;
+      padding-bottom: 60px; /* Prevent overlap with the fixed bottom bar */
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    /* Vertical container for two sections */
+    .vertical-container {
+      display: flex;
+      flex-direction:column;
+      margin-left: 250px;
+      width: 850px;
+      gap: 10px;
+    }
+    /* Top Container: Welcome Message */
+    .welcome-container {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      text-align: center;
+      margin-top: 20px;
+    }
+    .welcome-container p {
+      font-size: 16px;
+      color: #333;
+    }
+    .welcome-container a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    /* Bottom Container: Login Form and Image */
+    .login-container {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    /* Login Form styling */
+    .form-container {
+      margin-bottom: 20px;
+    }
+    .form-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #333;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      text-align: center;
+      font-size: 14px;
+    }
+    button[type="submit"] {
+      background-color: #333;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      width: 80%;
+      border-radius: 4px;
+      font-size: 16px;
+      margin: 5px;
+      margin-left: 80px;
+    }
+    .button-group {
+      margin-top: 10px;
+    }
+    .button-group p {
+      margin-left: 280px;
+    }
+    .info-group {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .info-group a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    /* Bottom Bar styling */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 14px;
+    }
+    button:hover {
+      background-color: #e78f2b;
+      color: #333;
+    }
+  </style>
+  <script>
+    // Function to simulate login and redirect to main.html.
+    // In a real application, credentials would be validated on the server.
+    function redirectToMain(event) {
+      event.preventDefault(); // Prevent default form submission
+      window.location.href = "main.html"; // Redirect to main.html
+    }
+  </script>
+</head>
+<body>
+  <div class="vertical-container">
+    <!-- Top Container: Welcome Message -->
+    <div class="welcome-container">
+      <h1>Welcome to Auction App</h1>
+      <p>Please login or register to watch the auction live.</p>
+    </div>
+    
+    <!-- Bottom Container: Login Form and Image -->
+    <div class="login-container">
+      <!-- Login Form -->
+      <div class="form-container">
+        <h2>Login</h2>
+        <form id="loginForm" action="/login" method="POST" onsubmit="redirectToMain(event)">
+          <div class="form-group">
+            <label for="username">Username:</label>
+            <!-- Username: only letters, maximum of 10 characters -->
+            <input type="text" name="username" id="username" 
+                   pattern="^[A-Za-z]{1,10}$" 
+                   maxlength="10" 
+                   required 
+                   title="Username must contain only letters and be up to 10 characters long.">
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <!-- Password: only numbers allowed -->
+            <input type="password" name="password" id="password" 
+                   pattern="^[0-9]+$" 
+                   required 
+                   title="Password must contain only numbers.">
+          </div>
+          <button type="submit">Login</button>
+        </form>
+        <div class="button-group">
+          <p>Don't have an account? <a href="register.html">Register here</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    &copy; 2023 Auction App. Welcome to Auction App!
+  </div>
+</body>
+</html>

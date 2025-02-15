@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Ensures proper scaling on mobile devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auction App - Register</title>
+  <style>
+    body {
+    font-family: Arial, sans-serif;
+    background-image:linear-gradient(to left,#0051ff, #ff9100);
+    margin: 0;
+    padding: 0;
+  }
+  
+  .button-group button {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  .button-group button {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+  }
+  
+  .info-group p {
+    margin: 5px 0;
+    text-align: center;
+  }
+
+  .container {
+    width: 80%;
+    margin: 50px auto;
+    background: #fff;
+    padding: 20px;
+    text-align: center;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  .form-container {
+    width: 400px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  
+  .form-container h2 {
+    text-align: center;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    text-align: left;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #e78f2b;
+    color: #333;
+  }
+  
+  a {
+    color: #333;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Register</h2>
+    <!-- Form submits data to /register using the POST method -->
+    <form action="/register" method="POST">
+      <div class="form-group">
+        <label for="fullname">Full Name:</label>
+        <input type="text" name="fullname" id="fullname" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" required>
+      </div>
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required>
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password:</label>
+        <input type="password" name="confirmPassword" id="confirmPassword" required>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone Number:</label>
+        <input type="tel" name="phone" id="phone">
+      </div>
+      <div class="form-group button-group">
+        <button type="submit">Register</button>
+        <button type="button" onclick="window.location.href='index.html';">Back</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

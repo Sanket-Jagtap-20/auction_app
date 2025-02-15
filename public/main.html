@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auction App - Main Page</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #4273df;
+      margin: 0;
+      padding: 20px;
+      /* Add bottom padding so content doesn't overlap with the fixed bottom bar */
+      padding-bottom: 60px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    /* Navigation Bar styling */
+    nav {
+      background-color: #333;
+      overflow: hidden;
+      width: 100%;
+    }
+    nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: space-around;
+    }
+    nav ul li {
+      flex: 1;
+    }
+    nav ul li a {
+      display: block;
+      padding: 14px 20px;
+      text-decoration: none;
+      color: #fff;
+      text-align: center;
+      transition: background-color 0.3s;
+    }
+    nav ul li a:hover {
+      background-color: #e78f2b;
+      color: #333;
+    }
+    @media (max-width: 600px) {
+      nav ul {
+        flex-direction: column;
+      }
+    }
+    /* Live Timing styling */
+    .live-timing {
+      font-size: 14px;
+      color: #ffffff;
+      margin: 10px;
+      margin-top: 18px;
+      text-align: left;
+    }
+    /* Players list styling */
+    .players-list1,
+    .players-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 0 10px;
+    }
+    .player-card {
+      flex: 1 1 calc(16.66% - 10px);
+      box-sizing: border-box;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      background-color: #fff;
+      position: relative; /* Needed for delete icon positioning */
+    }
+    .player-card img {
+      width: 150px;
+      height: 190px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin: auto;
+    }
+    .player-card-name {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 8px 0;
+      color: #000000;
+    }
+    .player-card p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #333;
+    }
+    .player-card1 {
+      flex: 1 1 calc(16.66% - 10px);
+      box-sizing: border-box;
+      text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      background-color: #fff;
+      position: relative; /* Needed for delete icon positioning */
+    }
+    .player-card1 img {
+      width: 150px;
+      height: 190px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin: auto;
+    }
+    .player-card1-name {
+      font-size: 16px;
+      font-weight: bold;
+      margin: 8px 0;
+      color: #000000;
+    }
+    .player-card1 p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #333;
+    }
+    /* Delete icon styling */
+    .delete-icon {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      font-size: 12px; /* Very small */
+      color: rgb(0, 0, 0);
+      background-color: red;
+      padding: 3px;
+      cursor: pointer;
+      z-index: 2;
+    }
+    /* Bottom Bar styling */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #333;
+      color: #ffffff;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 14px;
+    }
+    /* Optional hover styles */
+    .player-card1:hover {
+      background-color: rgb(61, 201, 61);
+    }
+    .player-card:hover {
+      background-color: red;
+    }
+  </style>
+  <script>
+    // Update live timing and date every second.
+    function updateTime() {
+      const now = new Date();
+      const options = {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      };
+      document.getElementById('liveTime').innerText = now.toLocaleDateString('en-US', options);
+    }
+    
+    // Deletes a player from localStorage and reloads the appropriate list.
+    function deletePlayer(type, index) {
+      if (type === 'unsold') {
+        let unsoldPlayers = JSON.parse(localStorage.getItem("unsoldPlayers")) || [];
+        unsoldPlayers.splice(index, 1);
+        localStorage.setItem("unsoldPlayers", JSON.stringify(unsoldPlayers));
+        loadUnsoldPlayers();
+      } else if (type === 'sold') {
+        let soldPlayers = JSON.parse(localStorage.getItem("soldPlayers")) || [];
+        soldPlayers.splice(index, 1);
+        localStorage.setItem("soldPlayers", JSON.stringify(soldPlayers));
+        loadSoldPlayers();
+      }
+    }
+    
+    // Load and display unsold players.
+    function loadUnsoldPlayers() {
+      let unsoldPlayersJSON = localStorage.getItem("unsoldPlayers");
+      let unsoldList = document.getElementById("unsoldList");
+      unsoldList.innerHTML = ""; // Clear existing content.
+      
+      if (unsoldPlayersJSON) {
+        let unsoldPlayers = JSON.parse(unsoldPlayersJSON);
+        unsoldPlayers.forEach((player, index) => {
+          // Create a card element.
+          let card = document.createElement("div");
+          card.className = "player-card";
+          
+          // Create and add the delete icon.
+          let deleteIcon = document.createElement("span");
+          deleteIcon.className = "delete-icon";
+          deleteIcon.innerHTML = "&times;"; // × symbol.
+          deleteIcon.onclick = function() {
+            deletePlayer('unsold', index);
+          };
+          card.appendChild(deleteIcon);
+          
+          // Player image.
+          let img = document.createElement("img");
+          img.src = player.imageUrl;
+          img.alt = player.name;
+          card.appendChild(img);
+          
+          // Player name.
+          let name = document.createElement("div");
+          name.className = "player-card-name";
+          name.innerText = player.name;
+          card.appendChild(name);
+          
+          // Unsold Tag.
+          let tag = document.createElement("p");
+          tag.innerText = "Unsold";
+          tag.style.color = "red";
+          tag.style.fontWeight = "bold";
+          card.appendChild(tag);
+          
+          // Append the card to the unsold list.
+          unsoldList.appendChild(card);
+        });
+      }
+    }
+    
+    // Load and display sold players.
+    function loadSoldPlayers() {
+      let soldPlayersJSON = localStorage.getItem("soldPlayers");
+      let soldList = document.getElementById("soldList");
+      soldList.innerHTML = ""; // Clear existing content.
+      
+      if (soldPlayersJSON) {
+        let soldPlayers = JSON.parse(soldPlayersJSON);
+        soldPlayers.forEach((player, index) => {
+          // Create a card element.
+          let card = document.createElement("div");
+          card.className = "player-card1";
+          
+          // Create and add the delete icon.
+          let deleteIcon = document.createElement("span");
+          deleteIcon.className = "delete-icon";
+          deleteIcon.innerHTML = "&times;";
+          deleteIcon.onclick = function() {
+            deletePlayer('sold', index);
+          };
+          card.appendChild(deleteIcon);
+          
+          // Player image.
+          let img = document.createElement("img");
+          img.src = player.imageUrl;
+          img.alt = player.name;
+          card.appendChild(img);
+          
+          // Player name.
+          let name = document.createElement("div");
+          name.className = "player-card-name";
+          name.innerText = player.name;
+          card.appendChild(name);
+          
+          // Sold Tag.
+          let tag = document.createElement("p");
+          tag.innerText = "Sold";
+          tag.style.color = "green";
+          tag.style.fontWeight = "bold";
+          card.appendChild(tag);
+          
+          // Append the card to the sold list.
+          soldList.appendChild(card);
+        });
+      }
+    }
+    
+    // On page load, update the time and load both player lists.
+    window.onload = function() {
+      updateTime();
+      setInterval(updateTime, 1000);
+      loadUnsoldPlayers();
+      loadSoldPlayers();
+    }
+  </script>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav>
+    <ul>
+      <li><a href="index.html">Logout</a></li>
+      <li><a href="owner.html">Owners</a></li>
+      <li><a href="player_info.html">Player Info</a></li>
+      <li><a href="bid.html">Live Bid</a></li>
+    </ul>
+  </nav>
+
+  <!-- Live Timing and Date (below nav bar) -->
+  <div class="live-timing" id="liveTime"></div>
+
+  <!-- Sold Players Container -->
+  <div class="players-container1">
+    <h2>Sold Players</h2>
+    <div id="soldList" class="players-list1">
+      <!-- Sold player cards will be appended here -->
+    </div>
+  </div>
+  
+  <!-- Unsold Players Container -->
+  <div class="players-container">
+    <h2>Unsold Players</h2>
+    <div id="unsoldList" class="players-list">
+      <!-- Unsold player cards will be appended here -->
+    </div>
+  </div>
+  
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    &copy; 2023 Auction App. Welcome to Auction App!
+  </div>
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Ensures proper scaling on mobile devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auction App - Live Bid</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #4273df;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    /* Container layout using Flexbox */
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .left-section, .right-section {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .left-section {
+      flex: 1 1 300px;
+      text-align: center;
+    }
+    .right-section {
+      flex: 1 1 300px;
+    }
+    /* Player photo and name */
+    .player-photo {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    .player-name {
+      font-size: 32px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    /* Button styling */
+    .bid-btn, .select-btn, .back-btn, .owner-btn, .sold-btn, .unsold-btn {
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      margin: 5px;
+      width: 120px;
+    }
+    .select-btn {
+      width: 150px;
+    }
+    .back-btn {
+      margin-left: 615px;
+    }
+    /* Dropdown styling for owner selection */
+    .dropdown-container {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 110%;
+      left: 0;
+      background-color: #fff;
+      min-width: 100px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+    .dropdown-content div {
+      padding: 8px;
+      cursor: pointer;
+    }
+    .dropdown-content div:hover {
+      background-color: #f0f0f0;
+    }
+    /* Career stats table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    table th {
+      background-color: #333;
+      color: #fff;
+    }
+    /* Live Bid Section */
+    .bid-section {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .bid-section h3 {
+      margin: 0 0 10px;
+    }
+    .current-bid {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    /* Container for owner and lock buttons */
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    .bid-btn:hover,
+    .select-btn:hover,
+    .back-btn:hover,
+    .owner-btn:hover,
+    .sold-btn:hover,
+    .unsold-btn:hover {
+      background-color: #e78f2b;
+      color: #333;
+      font-weight: bold;
+    }
+    /* Bottom Bar styling */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #333;
+      color: #ffffff;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Live Bid Page</h1>
+  <div class="container">
+    <!-- Left Section: Player Photo, Name, and Select Player Button -->
+    <div class="left-section">
+      <!-- Default image and name; these will update if a player was selected -->
+      <img src="Sachin.avif" alt="Player Photo" class="player-photo">
+      <div class="player-name" id="playerName">Default Player</div>
+      <!-- Select Player Button -->
+      <button class="select-btn" onclick="window.location.href='player_info.html'">Select Player</button>
+    </div>
+    <!-- Right Section: Career Stats and Live Bidding -->
+    <div class="right-section">
+      <!-- Career Stats Table -->
+      <table>
+        <tr>
+          <th>Matches Played</th>
+          <td id="matches">N/A</td>
+        </tr>
+        <tr>
+          <th>Runs</th>
+          <td id="runs">N/A</td>
+        </tr>
+        <tr>
+          <th>Wickets</th>
+          <td id="wickets">N/A</td>
+        </tr>
+        <tr>
+          <th>50s</th>
+          <td id="fifties">N/A</td>
+        </tr>
+        <tr>
+          <th>100s</th>
+          <td id="hundreds">N/A</td>
+        </tr>
+        <tr>
+          <th>Base Price</th>
+          <td id="base-price">$50000</td>
+        </tr>
+      </table>
+      <!-- Live Bidding Section -->
+      <div class="bid-section">
+        <h3>Live Bidding</h3>
+        <div class="current-bid">Current Bid: $<span id="currentBid">50000</span></div>
+        <!-- Action Buttons Container: Owner Dropdown and Lock (Sold) Button -->
+        <div class="action-buttons">
+          <!-- Owner Name Button with Dropdown -->
+          <div class="dropdown-container">
+            <button id="ownerNameBtn" class="owner-btn">Owner</button>
+            <div id="ownerDropdown" class="dropdown-content">
+              <!-- Dropdown items will be added dynamically -->
+            </div>
+          </div>
+          <!-- Sold (Lock) Button -->
+          <button id="lockBtn" class="sold-btn">Sold</button>
+        </div>
+        <button class="bid-btn" onclick="placeBid()" id="bidButton" style="margin-top: 10px;">Place Bid</button>
+        <!-- Unsold Button -->
+        <button class="unsold-btn" onclick="markUnsold()" id="unsoldButton" style="margin-top: 10px;">Unsold</button>
+      </div>
+    </div>
+  </div>
+  <!-- Back Button linking to main.html -->
+  <button class="back-btn" onclick="window.location.href='main.html'">Back</button>
+
+  <script>
+    // ---------------------------
+    // Global List of Available Players
+    // (This list should ideally come from your player info page or a backend API.)
+    // Here are sample players (you can update or expand as needed).
+    const availablePlayers = [
+      { name: "Sachin", imageUrl: "Sachin.avif", matches: 664, runs: 34357, wickets: 200, fifties: 96, hundreds: 49, basePrice: 50000 },
+      { name: "Dhoni", imageUrl: "dhoni.avif", matches: 350, runs: 10773, wickets: 1, fifties: 56, hundreds: 10, basePrice: 50000 },
+      { name: "Virat", imageUrl: "kohli.avif", matches: 254, runs: 12169, wickets: 4, fifties: 62, hundreds: 43, basePrice: 50000 },
+      { name: "Bumrah", imageUrl: "bumrah.avif", matches: 100, runs: 200, wickets: 80, fifties: 0, hundreds: 0, basePrice: 50000 },
+      { name: "Shubman Gill", imageUrl: "gill.avif", matches: 40, runs: 1800, wickets: 0, fifties: 10, hundreds: 2, basePrice: 60000 },
+      { name: "Naseem Shah", imageUrl: "naseem.avif", matches: 20, runs: 150, wickets: 40, fifties: 0, hundreds: 0, basePrice: 50000 },
+      { name: "Umran Malik", imageUrl: "umran.avif", matches: 15, runs: 100, wickets: 25, fifties: 0, hundreds: 0, basePrice: 55000 }
+      // ... add more players as needed.
+    ];
+
+    // ---------------------------
+    // Function to Check if a Player Already Exists in Sold/Unsold Lists
+    // ---------------------------
+    function checkPlayerExistence(playerData) {
+      const soldPlayersJSON = localStorage.getItem("soldPlayers");
+      const unsoldPlayersJSON = localStorage.getItem("unsoldPlayers");
+      
+      if (soldPlayersJSON) {
+        const soldPlayers = JSON.parse(soldPlayersJSON);
+        if (soldPlayers.some(p => p.name === playerData.name)) {
+          return true;
+        }
+      }
+      
+      if (unsoldPlayersJSON) {
+        const unsoldPlayers = JSON.parse(unsoldPlayersJSON);
+        if (unsoldPlayers.some(p => p.name === playerData.name)) {
+          return true;
+        }
+      }
+      
+      return false;
+    }
+
+    // ---------------------------
+    // Function to Get a Random Available Player (Not Already Sold/Unsold)
+    // ---------------------------
+    function getRandomAvailablePlayer() {
+      const soldPlayersJSON = localStorage.getItem("soldPlayers");
+      const unsoldPlayersJSON = localStorage.getItem("unsoldPlayers");
+      
+      let soldNames = soldPlayersJSON ? JSON.parse(soldPlayersJSON).map(p => p.name) : [];
+      let unsoldNames = unsoldPlayersJSON ? JSON.parse(unsoldPlayersJSON).map(p => p.name) : [];
+      
+      // Filter availablePlayers to only include players not already sold/unsold.
+      let remaining = availablePlayers.filter(player => 
+        !soldNames.includes(player.name) && !unsoldNames.includes(player.name)
+      );
+      
+      if (remaining.length > 0) {
+        const randomIndex = Math.floor(Math.random() * remaining.length);
+        return remaining[randomIndex];
+      }
+      return null;
+    }
+
+    // ---------------------------
+    // Owner Dropdown Functionality
+    // ---------------------------
+    const ownerNames = [
+      "Owner A", "Owner B", "Owner C", "Owner D", "Owner E",
+      "Owner F", "Owner G", "Owner H", "Owner I", "Owner J",
+      "Owner K", "Owner L"
+    ];
+
+    const ownerDropdown = document.getElementById("ownerDropdown");
+    ownerNames.forEach(name => {
+      const item = document.createElement("div");
+      item.innerText = name;
+      item.onclick = function(event) {
+        document.getElementById("ownerNameBtn").innerText = name;
+        ownerDropdown.style.display = "none";
+        event.stopPropagation();
+      };
+      ownerDropdown.appendChild(item);
+    });
+
+    const ownerNameBtn = document.getElementById("ownerNameBtn");
+    ownerNameBtn.onclick = function(event) {
+      event.stopPropagation();
+      if (ownerDropdown.style.display === "none" || ownerDropdown.style.display === "") {
+        ownerDropdown.style.display = "block";
+      } else {
+        ownerDropdown.style.display = "none";
+      }
+    };
+
+    window.addEventListener("click", function() {
+      ownerDropdown.style.display = "none";
+    });
+
+    // ---------------------------
+    // Bidding Functionality
+    // ---------------------------
+    let currentBid = 50000;
+    document.getElementById('currentBid').innerText = currentBid;
+
+    function placeBid() {
+      if (currentBid < 80000) {
+        currentBid += 2000;
+      } else {
+        currentBid += 5000;
+      }
+      document.getElementById('currentBid').innerText = currentBid;
+      document.getElementById("unsoldButton").disabled = true;
+      document.getElementById("unsoldButton").innerText = "Locked";
+    }
+
+    // ---------------------------
+    // Sold (Lock) Button Functionality
+    // ---------------------------
+    document.getElementById("lockBtn").onclick = function() {
+      let ownerName = document.getElementById("ownerNameBtn").innerText;
+      if (ownerName === "Owner") {
+        alert("Please select an owner first.");
+        return;
+      }
+      let playerDataJSON = localStorage.getItem("playerData");
+      if (!playerDataJSON) {
+        alert("No player data available. Please select a player.");
+        return;
+      }
+      let playerData = JSON.parse(playerDataJSON);
+      
+      // If player exists in sold/unsold list, do not allow bidding.
+      if(checkPlayerExistence(playerData)) {
+        alert("This player is already sold or marked as unsold. You cannot bid on them again.");
+        window.location.href = "main.html";
+        return;
+      }
+      
+      let ownerTeams = localStorage.getItem("ownerTeams");
+      let teams = ownerTeams ? JSON.parse(ownerTeams) : {};
+      if (!teams[ownerName]) {
+        teams[ownerName] = [];
+      }
+      teams[ownerName].push(playerData);
+      localStorage.setItem("ownerTeams", JSON.stringify(teams));
+
+      playerData.sold = true;
+      let soldPlayers = localStorage.getItem("soldPlayers");
+      soldPlayers = soldPlayers ? JSON.parse(soldPlayers) : [];
+      soldPlayers.push(playerData);
+      localStorage.setItem("soldPlayers", JSON.stringify(soldPlayers));
+
+      document.getElementById("bidButton").disabled = true;
+      document.getElementById("bidButton").innerText = "Locked";
+      document.getElementById("lockBtn").disabled = true;
+      document.getElementById("lockBtn").innerText = "Locked";
+
+      alert(`Player ${playerData.name} has been added to ${ownerName}'s team.`);
+    };
+
+    // ---------------------------
+    // Unsold Button Functionality
+    // ---------------------------
+    function markUnsold() {
+      document.getElementById("bidButton").disabled = true;
+      document.getElementById("lockBtn").disabled = true;
+      document.getElementById("ownerNameBtn").disabled = true;
+      document.getElementById("unsoldButton").disabled = true;
+      document.getElementById("bidButton").innerText = "Locked";
+      document.getElementById("lockBtn").innerText = "Locked";
+      
+      let playerDataJSON = localStorage.getItem("playerData");
+      if (playerDataJSON) {
+        let playerData = JSON.parse(playerDataJSON);
+        if(checkPlayerExistence(playerData)) {
+          alert("This player is already sold or marked as unsold. You cannot bid on them again.");
+          window.location.href = "main.html";
+          return;
+        }
+        playerData.unsold = true;
+        let unsoldPlayers = localStorage.getItem("unsoldPlayers");
+        unsoldPlayers = unsoldPlayers ? JSON.parse(unsoldPlayers) : [];
+        unsoldPlayers.push(playerData);
+        localStorage.setItem("unsoldPlayers", JSON.stringify(unsoldPlayers));
+      }
+      
+      alert("Bidding closed. This player is marked as Unsold.");
+    }
+
+    // ---------------------------
+    // On Page Load: Update Player Details (and Auto-Select Random if Already Sold/Unsold)
+    // ---------------------------
+    window.onload = function() {
+      let playerDataJSON = localStorage.getItem('playerData');
+      if (playerDataJSON) {
+        let playerData = JSON.parse(playerDataJSON);
+        // If the current player is already sold or unsold, auto-select a random available player.
+        if (checkPlayerExistence(playerData)) {
+          let newPlayer = getRandomAvailablePlayer();
+          if(newPlayer) {
+            localStorage.setItem('playerData', JSON.stringify(newPlayer));
+            playerData = newPlayer;
+          } else {
+            alert("No available players left for bidding.");
+            window.location.href = "main.html";
+            return;
+          }
+        }
+        document.getElementById('playerName').innerText = playerData.name;
+        document.querySelector('.player-photo').src = playerData.imageUrl;
+        document.getElementById('matches').innerText = playerData.matches;
+        document.getElementById('runs').innerText = playerData.runs;
+        document.getElementById('wickets').innerText = playerData.wickets;
+        document.getElementById('fifties').innerText = playerData.fifties;
+        document.getElementById('hundreds').innerText = playerData.hundreds;
+        document.getElementById('base-price').innerText = "$" + playerData.basePrice;
+        currentBid = playerData.basePrice;
+        document.getElementById('currentBid').innerText = currentBid;
+      }
+    }
+  </script>
+    
+  <div class="bottom-bar">
+    &copy; 2023 Auction App. Welcome to Auction App!
+  </div>
+</body>
+</html>

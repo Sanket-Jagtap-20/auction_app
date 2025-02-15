@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auction App - Owners</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #4273df;
+      margin: 0;
+      padding: 20px;
+      padding-bottom: 60px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    /* Search Bar */
+    .search-container {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .search-container input {
+      width: 50%;
+      max-width: 400px;
+      padding: 8px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-align: center;
+    }
+    /* Owners Cards Container (Grid layout) */
+    .owners-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+    /* Owner Card Styles */
+    .owner-card {
+      flex: 0 0 calc(22.22% - 30px); /* Four cards per row on large screens */
+      background-color: #ffffff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+    .owner-card:hover {
+      transform: scale(1.05);
+      background-image: linear-gradient(to right, #1100ff, #ff9100);
+    }
+    .card-image {
+      flex-shrink: 0;
+    }
+    /* Force all images to a fixed size */
+    .card-image img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-left: 70px;
+    }
+    .owner-details {
+      margin-left: 90px;
+    }
+    .owner-name {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 0;
+    }
+    .money-info {
+      font-size: 14px;
+      color: rgb(0, 0, 0);
+      font-weight: bolder;
+      margin-top: 5px;
+      line-height: 1.3;
+    }
+    /* Modal Styling */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 600px;
+      border-radius: 8px;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .modal-close:hover,
+    .modal-close:focus {
+      color: #000;
+    }
+    .team-header {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .team-players {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .team-players th,
+    .team-players td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    .team-players th {
+      background-color: #333;
+      color: #fff;
+    }
+    /* Style for delete link */
+    .delete-player {
+      color: red;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .delete-player:hover {
+      text-decoration: underline;
+    }
+    /* Back Button */
+    .back-btn {
+      display: block;
+      margin: 20px auto 0;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+      width: 150px;
+      text-decoration: none;
+    }
+    .back-btn:hover {
+      background-color: #e78f2b;
+      color: #333;
+    }
+    /* Bottom Bar styling */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #333;
+      color: #ffffff;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 14px;
+    }
+    /* Responsive: For smaller screens, adjust grid */
+    @media (max-width: 768px) {
+      .owner-card {
+        flex: 0 0 calc(50% - 20px);
+      }
+      .search-container input {
+        width: 80%;
+      }
+    }
+    @media (max-width: 480px) {
+      .owner-card {
+        flex: 0 0 100%;
+      }
+      .search-container input {
+        width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Team Owners</h1>
+  <!-- Search Bar -->
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search Owner Name" />
+  </div>
+  
+  <!-- Owners Cards Container -->
+  <div class="owners-container" id="ownersContainer">
+    <!-- Owner cards will be generated dynamically -->
+  </div>
+
+  <!-- Modal for Team Details -->
+  <div id="teamModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <div class="team-header" id="teamName">Team Name</div>
+      <table class="team-players" id="teamPlayersTable">
+        <thead>
+          <tr>
+            <th>Player Name</th>
+            <th>Price</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Team players will be inserted here dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Back Button linking to main.html -->
+  <a class="back-btn" href="main.html">Back</a>
+
+  <script>
+    // Global variable to store the current owner when the modal is open.
+    let currentOwner = null;
+    // Fixed initial total money for every owner.
+    const INITIAL_TOTAL = 10000000;
+
+    // Sample data for 12 owners with initial total and remaining money.
+    const ownersData = [
+      { id: 1, name: "Owner A", image: "O4.jpg", totalMoney: "$10000000", remainingMoney: "$10000000", team: { teamName: "Team Alpha", players: [] } },
+      { id: 2, name: "Owner B", image: "O1.jpg", totalMoney: "$10000000", remainingMoney: "$10000000", team: { teamName: "Team Beta", players: [] } },
+      { id: 3, name: "Owner C", image: "O3.jpg", totalMoney: "$10000000", remainingMoney: "$10000000", team: { teamName: "Team Gamma", players: [] } },
+      { id: 4, name: "Owner D", image: "O2.jpg", totalMoney: "$10000000", remainingMoney: "$10000000", team: { teamName: "Team Delta", players: [] } },
+      { id: 5, name: "Owner E", image: "O4.jpg", totalMoney: "$10000000", remainingMoney: "$10000000", team: { teamName: "Team Epsilon", players: [] } },
+      { id: 6, name: "Owner F", image: "O3.jpg", totalMoney: "$10000000", remainingMoney: "$10000000", team: { teamName: "Team Zeta", players: [] } },
+      { id: 7, name: "Owner G", image: "O2.jpg", totalMoney: "$10000000", remainingMoney: "$10000000", team: { teamName: "Team Eta", players: [] } },
+      { id: 8, name: "Owner H", image: "O1.jpg", totalMoney: "$10000000", remainingMoney: "$10000000", team: { teamName: "Team Theta", players: [] } },
+      { id: 9, name: "Owner I", image: "O3.jpg", totalMoney: "$10000000", remainingMoney: "$10000000", team: { teamName: "Team Iota", players: [] } },
+      { id: 10, name: "Owner J", image: "O2.jpg", totalMoney: "$10000000", remainingMoney: "$10000000", team: { teamName: "Team Kappa", players: [] } },
+      { id: 11, name: "Owner K", image: "O1.jpg", totalMoney: "$10000000", remainingMoney: "$10000000", team: { teamName: "Team Lambda", players: [] } },
+      { id: 12, name: "Owner L", image: "O4.jpg", totalMoney: "$10000000", remainingMoney: "$10000000", team: { teamName: "Team Mu", players: [] } }
+    ];
+
+    // Generate owner cards.
+    function generateOwnerCards(data) {
+      const container = document.getElementById("ownersContainer");
+      container.innerHTML = ""; // Clear previous cards
+      data.forEach(owner => {
+        const card = document.createElement("div");
+        card.classList.add("owner-card");
+        card.innerHTML = `
+          <div class="card-header">
+            <div class="card-image">
+              <img src="${owner.image}" alt="${owner.name}" />
+            </div>
+            <div class="owner-details">
+              <p class="owner-name">${owner.name}</p>
+              <p class="money-info">
+                Total: ${owner.totalMoney}<br>
+                Remaining: ${owner.remainingMoney}
+              </p>
+            </div>
+          </div>
+        `;
+        // When the card is clicked, pass the entire owner object to show the modal.
+        card.addEventListener("click", () => {
+          showTeamModal(owner);
+        });
+        container.appendChild(card);
+      });
+    }
+
+    // Search filter functionality.
+    const searchInput = document.getElementById("searchInput");
+    searchInput.addEventListener("input", function () {
+      const searchTerm = searchInput.value.toLowerCase();
+      const filteredOwners = ownersData.filter(owner =>
+        owner.name.toLowerCase().includes(searchTerm)
+      );
+      generateOwnerCards(filteredOwners);
+    });
+
+    // Modal elements.
+    const teamModal = document.getElementById("teamModal");
+    const modalClose = document.getElementById("modalClose");
+    const teamNameElement = document.getElementById("teamName");
+    const teamPlayersTableBody = document.querySelector("#teamPlayersTable tbody");
+
+    // Function to update localStorage for a given owner.
+    function updateOwnerTeamsStorage(ownerName, players) {
+      let storedTeams = localStorage.getItem("ownerTeams");
+      if (storedTeams) {
+        storedTeams = JSON.parse(storedTeams);
+      } else {
+        storedTeams = {};
+      }
+      // Save players with their basePrice (removing the "$")
+      storedTeams[ownerName] = players.map(player => ({
+        name: player.name,
+        basePrice: player.price.replace('$', '')
+      }));
+      localStorage.setItem("ownerTeams", JSON.stringify(storedTeams));
+    }
+
+    // Function to display the modal with team details.
+    function showTeamModal(owner) {
+      currentOwner = owner; // Save the current owner globally
+      teamNameElement.innerText = owner.team.teamName;
+      // Clear any existing rows.
+      teamPlayersTableBody.innerHTML = "";
+      owner.team.players.forEach((player, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${player.name}</td>
+          <td style="font-weight:bold;">${player.price}</td>
+          <td><a href="#" class="delete-player" data-index="${index}">Delete</a></td>
+        `;
+        // Delete event for the player.
+        tr.querySelector('.delete-player').addEventListener('click', function(e) {
+          e.preventDefault();
+          // Remove the player from the team array.
+          owner.team.players.splice(index, 1);
+          // Update localStorage for this owner.
+          updateOwnerTeamsStorage(owner.name, owner.team.players);
+          // Recalculate remaining money.
+          recalcOwnerMoney(owner);
+          // Refresh the modal content.
+          showTeamModal(owner);
+          // Also refresh the owner cards.
+          generateOwnerCards(ownersData);
+        });
+        teamPlayersTableBody.appendChild(tr);
+      });
+      teamModal.style.display = "block";
+    }
+
+    // Function to recalculate an owner's remaining money based on team players.
+    function recalcOwnerMoney(owner) {
+      let totalSpent = 0;
+      if (owner.team.players && owner.team.players.length > 0) {
+        owner.team.players.forEach(player => {
+          // Remove "$" and convert to number.
+          let price = parseFloat(player.price.replace('$', ''));
+          totalSpent += price;
+        });
+      }
+      owner.totalMoney = "$" + INITIAL_TOTAL;
+      owner.remainingMoney = "$" + (INITIAL_TOTAL - totalSpent);
+    }
+
+    // Close modal when the close icon is clicked.
+    modalClose.onclick = function () {
+      teamModal.style.display = "none";
+    };
+
+    // Close modal if the user clicks outside the modal content.
+    window.onclick = function (event) {
+      if (event.target === teamModal) {
+        teamModal.style.display = "none";
+      }
+    };
+
+    // On page load, merge locked players from localStorage into the ownersData and recalc remaining money.
+    window.onload = function () {
+      const storedTeamsJSON = localStorage.getItem("ownerTeams");
+      if (storedTeamsJSON) {
+        const storedTeams = JSON.parse(storedTeamsJSON);
+        // For each owner in our sample data...
+        ownersData.forEach(owner => {
+          // If locked players exist for this owner, replace the team players with them.
+          if (storedTeams[owner.name] && storedTeams[owner.name].length > 0) {
+            owner.team.players = storedTeams[owner.name].map(player => ({
+              name: player.name,
+              price: "$" + player.basePrice
+            }));
+          }
+          // Recalculate remaining money for each owner.
+          recalcOwnerMoney(owner);
+          // Optionally, update the team name.
+          owner.team.teamName = owner.name + "'s Team";
+        });
+      }
+      // Generate the owner cards.
+      generateOwnerCards(ownersData);
+    };
+  </script>
+
+  <div class="bottom-bar">
+    &copy; 2023 Auction App. Welcome to Auction App!
+  </div>
+</body>
+</html>
