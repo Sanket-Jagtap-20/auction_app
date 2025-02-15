@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Ensures proper scaling on mobile devices -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Auction App - Main Page</title>
   <style>
@@ -67,7 +68,7 @@
       gap: 10px;
       padding: 0 10px;
     }
-    .player-card {
+    .player-card, .player-card1 {
       flex: 1 1 calc(16.66% - 10px);
       box-sizing: border-box;
       text-align: center;
@@ -77,51 +78,30 @@
       background-color: #fff;
       position: relative; /* Needed for delete icon positioning */
     }
-    .player-card img {
+    .player-card img, .player-card1 img {
       width: 150px;
       height: 190px;
       object-fit: cover;
       border-radius: 4px;
       margin: auto;
     }
-    .player-card-name {
+    .player-card-name, .player-card1-name {
       font-size: 16px;
       font-weight: bold;
       margin: 8px 0;
       color: #000000;
     }
-    .player-card p {
+    .player-card p, .player-card1 p {
       margin: 5px 0;
       font-size: 14px;
       color: #333;
     }
-    .player-card1 {
-      flex: 1 1 calc(16.66% - 10px);
-      box-sizing: border-box;
-      text-align: center;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 10px;
-      background-color: #fff;
-      position: relative; /* Needed for delete icon positioning */
-    }
-    .player-card1 img {
-      width: 150px;
-      height: 190px;
-      object-fit: cover;
-      border-radius: 4px;
-      margin: auto;
-    }
-    .player-card1-name {
-      font-size: 16px;
+    /* New CSS: Team Name displayed at the top of sold player cards */
+    .player-team-name {
+      font-size: 14px;
       font-weight: bold;
-      margin: 8px 0;
-      color: #000000;
-    }
-    .player-card1 p {
-      margin: 5px 0;
-      font-size: 14px;
       color: #333;
+      margin-bottom: 5px;
     }
     /* Delete icon styling */
     .delete-icon {
@@ -148,11 +128,11 @@
       font-size: 14px;
     }
     /* Optional hover styles */
-    .player-card1:hover {
-      background-color: rgb(61, 201, 61);
-    }
     .player-card:hover {
       background-color: red;
+    }
+    .player-card1:hover {
+      background-color: rgb(61, 201, 61);
     }
   </style>
   <script>
@@ -166,19 +146,34 @@
       document.getElementById('liveTime').innerText = now.toLocaleDateString('en-US', options);
     }
     
-    // Deletes a player from localStorage and reloads the appropriate list.
+    // Deletes a player from LocalStorage (sold/unsold lists) and updates ownerTeams.
     function deletePlayer(type, index) {
       if (type === 'unsold') {
         let unsoldPlayers = JSON.parse(localStorage.getItem("unsoldPlayers")) || [];
+        let removedPlayer = unsoldPlayers[index];
         unsoldPlayers.splice(index, 1);
         localStorage.setItem("unsoldPlayers", JSON.stringify(unsoldPlayers));
         loadUnsoldPlayers();
+        // Update owner teams.
+        updateOwnerTeams(removedPlayer);
       } else if (type === 'sold') {
         let soldPlayers = JSON.parse(localStorage.getItem("soldPlayers")) || [];
+        let removedPlayer = soldPlayers[index];
         soldPlayers.splice(index, 1);
         localStorage.setItem("soldPlayers", JSON.stringify(soldPlayers));
         loadSoldPlayers();
+        // Remove this player from ownerTeams.
+        updateOwnerTeams(removedPlayer);
       }
+    }
+    
+    // Remove the given player from all owner teams.
+    function updateOwnerTeams(player) {
+      let ownerTeams = JSON.parse(localStorage.getItem("ownerTeams") || "{}");
+      for (let owner in ownerTeams) {
+        ownerTeams[owner] = ownerTeams[owner].filter(p => p.name !== player.name);
+      }
+      localStorage.setItem("ownerTeams", JSON.stringify(ownerTeams));
     }
     
     // Load and display unsold players.
@@ -190,39 +185,32 @@
       if (unsoldPlayersJSON) {
         let unsoldPlayers = JSON.parse(unsoldPlayersJSON);
         unsoldPlayers.forEach((player, index) => {
-          // Create a card element.
           let card = document.createElement("div");
           card.className = "player-card";
           
-          // Create and add the delete icon.
+          // Delete icon.
           let deleteIcon = document.createElement("span");
           deleteIcon.className = "delete-icon";
-          deleteIcon.innerHTML = "&times;"; // × symbol.
-          deleteIcon.onclick = function() {
-            deletePlayer('unsold', index);
-          };
+          deleteIcon.innerHTML = "&times;";
+          deleteIcon.onclick = function() { deletePlayer('unsold', index); };
           card.appendChild(deleteIcon);
           
-          // Player image.
           let img = document.createElement("img");
           img.src = player.imageUrl;
           img.alt = player.name;
           card.appendChild(img);
           
-          // Player name.
           let name = document.createElement("div");
           name.className = "player-card-name";
           name.innerText = player.name;
           card.appendChild(name);
           
-          // Unsold Tag.
           let tag = document.createElement("p");
           tag.innerText = "Unsold";
           tag.style.color = "red";
           tag.style.fontWeight = "bold";
           card.appendChild(tag);
           
-          // Append the card to the unsold list.
           unsoldList.appendChild(card);
         });
       }
@@ -237,45 +225,46 @@
       if (soldPlayersJSON) {
         let soldPlayers = JSON.parse(soldPlayersJSON);
         soldPlayers.forEach((player, index) => {
-          // Create a card element.
           let card = document.createElement("div");
           card.className = "player-card1";
           
-          // Create and add the delete icon.
+          // Team name (displayed at the top of card)
+          if (player.owner) {
+            let teamDiv = document.createElement("div");
+            teamDiv.className = "player-team-name";
+            teamDiv.innerText = "Team: " + player.owner;
+            card.appendChild(teamDiv);
+          }
+          
+          // Delete icon.
           let deleteIcon = document.createElement("span");
           deleteIcon.className = "delete-icon";
           deleteIcon.innerHTML = "&times;";
-          deleteIcon.onclick = function() {
-            deletePlayer('sold', index);
-          };
+          deleteIcon.onclick = function() { deletePlayer('sold', index); };
           card.appendChild(deleteIcon);
           
-          // Player image.
           let img = document.createElement("img");
           img.src = player.imageUrl;
           img.alt = player.name;
           card.appendChild(img);
           
-          // Player name.
           let name = document.createElement("div");
-          name.className = "player-card-name";
+          name.className = "player-card1-name";
           name.innerText = player.name;
           card.appendChild(name);
           
-          // Sold Tag.
           let tag = document.createElement("p");
           tag.innerText = "Sold";
           tag.style.color = "green";
           tag.style.fontWeight = "bold";
           card.appendChild(tag);
           
-          // Append the card to the sold list.
           soldList.appendChild(card);
         });
       }
     }
     
-    // On page load, update the time and load both player lists.
+    // On page load, update time and load both sold and unsold players.
     window.onload = function() {
       updateTime();
       setInterval(updateTime, 1000);
